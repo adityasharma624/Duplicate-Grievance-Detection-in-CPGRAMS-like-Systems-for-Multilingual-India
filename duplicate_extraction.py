@@ -67,7 +67,7 @@ def extract_duplicate_pairs(
                         'complaint_id_1': id1,
                         'complaint_id_2': id2,
                         'similarity_score': float(similarity),
-                        'cluster_id': cluster_id,
+                        'cluster_id': int(cluster_id),  # Ensure native Python int for JSON serialization
                         'text_1': complaint1['text'],
                         'text_2': complaint2['text']
                     }
