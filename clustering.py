@@ -93,9 +93,9 @@ def get_cluster_statistics(clusters: Dict[int, List[str]]) -> Dict[str, Any]:
         'n_clusters': len(clusters),
         'n_singletons': sum(1 for size in cluster_sizes if size == 1),
         'n_multi_item_clusters': sum(1 for size in cluster_sizes if size > 1),
-        'max_cluster_size': max(cluster_sizes) if cluster_sizes else 0,
-        'mean_cluster_size': np.mean(cluster_sizes) if cluster_sizes else 0,
-        'median_cluster_size': np.median(cluster_sizes) if cluster_sizes else 0
+        'max_cluster_size': int(max(cluster_sizes)) if cluster_sizes else 0,
+        'mean_cluster_size': float(np.mean(cluster_sizes)) if cluster_sizes else 0.0,
+        'median_cluster_size': float(np.median(cluster_sizes)) if cluster_sizes else 0.0
     }
     
     return stats

@@ -164,9 +164,9 @@ def run_pipeline(
     
     # Return results summary
     results = {
-        'n_complaints': len(preprocessed_complaints),
-        'n_clusters': cluster_stats['n_clusters'],
-        'n_duplicate_pairs': len(duplicate_pairs),
+        'n_complaints': int(len(preprocessed_complaints)),
+        'n_clusters': int(cluster_stats['n_clusters']),
+        'n_duplicate_pairs': int(len(duplicate_pairs)),
         'output_dir': str(output_dir)
     }
     

@@ -147,12 +147,27 @@ def export_clusters_for_inspection(
     # Format clusters with full complaint data
     formatted_clusters = []
     for cluster_id, complaint_ids in sampled_clusters.items():
+        # Convert complaint dictionaries to ensure JSON-serializable types
+        complaint_list = []
+        for cid in complaint_ids:
+            complaint = id_to_complaint[cid].copy()
+            # Convert all values to JSON-serializable types
+            serializable_complaint = {}
+            for key, value in complaint.items():
+                if isinstance(value, (np.integer, np.int64)):
+                    serializable_complaint[key] = int(value)
+                elif isinstance(value, (np.floating, np.float64)):
+                    serializable_complaint[key] = float(value)
+                elif isinstance(value, np.ndarray):
+                    serializable_complaint[key] = value.tolist()
+                else:
+                    serializable_complaint[key] = value
+            complaint_list.append(serializable_complaint)
+        
         cluster_data = {
-            'cluster_id': cluster_id,
-            'n_complaints': len(complaint_ids),
-            'complaints': [
-                id_to_complaint[cid] for cid in complaint_ids
-            ]
+            'cluster_id': int(cluster_id),  # Ensure native Python int
+            'n_complaints': int(len(complaint_ids)),
+            'complaints': complaint_list
         }
         formatted_clusters.append(cluster_data)
     
