@@ -210,6 +210,11 @@ Note: The input file must be a CSV or JSON file with 'id' and 'text' columns/fie
     
     args = parser.parse_args()
     
+    # Validate input file exists
+    if not args.input.exists():
+        parser.error(f"Input file not found: {args.input}\n"
+                    f"Please provide a valid CSV or JSON file path.")
+    
     # Run pipeline
     results = run_pipeline(
         input_file=args.input,
