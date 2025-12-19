@@ -183,6 +183,8 @@ Examples:
   python main.py --input data/complaints.csv
   python main.py --input data/complaints.json --output-dir results
   python main.py --input data/complaints.csv --skip-evaluation
+
+Note: The input file must be a CSV or JSON file with 'id' and 'text' columns/fields.
         """
     )
     
@@ -190,7 +192,7 @@ Examples:
         '--input',
         type=Path,
         required=True,
-        help='Path to input CSV or JSON file'
+        help='Path to input CSV or JSON file (required)'
     )
     
     parser.add_argument(
