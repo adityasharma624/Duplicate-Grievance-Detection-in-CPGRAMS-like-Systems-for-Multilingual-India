@@ -38,13 +38,11 @@ def load_complaints(file_path: Path) -> List[Dict[str, Any]]:
             f"Supported formats: {config.SUPPORTED_INPUT_FORMATS}"
         )
     
-    # Load data based on format
     if file_ext == ".csv":
         df = pd.read_csv(file_path)
     elif file_ext == ".json":
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        # Handle both list of dicts and single dict
         if isinstance(data, list):
             df = pd.DataFrame(data)
         else:
@@ -52,25 +50,21 @@ def load_complaints(file_path: Path) -> List[Dict[str, Any]]:
     else:
         raise ValueError(f"Unexpected file format: {file_ext}")
     
-    # Validate required columns
     if config.TEXT_COLUMN_NAME not in df.columns:
         raise ValueError(
             f"Required column '{config.TEXT_COLUMN_NAME}' not found. "
             f"Available columns: {list(df.columns)}"
         )
     
-    # Generate IDs if not present
     if config.ID_COLUMN_NAME not in df.columns:
         df[config.ID_COLUMN_NAME] = range(len(df))
     
-    # Extract relevant fields
     complaints = []
     for _, row in df.iterrows():
         complaint = {
             'id': str(row[config.ID_COLUMN_NAME]),
             'text': str(row[config.TEXT_COLUMN_NAME])
         }
-        # Preserve any additional metadata
         for col in df.columns:
             if col not in [config.ID_COLUMN_NAME, config.TEXT_COLUMN_NAME]:
                 complaint[col] = row[col]
@@ -94,7 +88,6 @@ def validate_complaints(complaints: List[Dict[str, Any]]) -> List[Dict[str, Any]
     valid_complaints = []
     for complaint in complaints:
         text = complaint.get('text', '')
-        # Keep complaints with non-empty text after stripping whitespace
         if text and str(text).strip():
             valid_complaints.append(complaint)
     

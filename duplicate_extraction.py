@@ -37,29 +37,22 @@ def extract_duplicate_pairs(
     """
     duplicate_pairs = []
     
-    # Process each cluster
     for cluster_id, complaint_ids in clusters.items():
-        # Skip singleton clusters (no pairs possible)
         if len(complaint_ids) < 2:
             continue
         
-        # Generate all pairs within cluster
         for i in range(len(complaint_ids)):
             for j in range(i + 1, len(complaint_ids)):
                 id1, id2 = complaint_ids[i], complaint_ids[j]
                 
-                # Get embeddings
                 idx1 = id_to_idx[id1]
                 idx2 = id_to_idx[id2]
-                emb1 = embeddings[idx1:idx1+1]  # Keep 2D shape
+                emb1 = embeddings[idx1:idx1+1]
                 emb2 = embeddings[idx2:idx2+1]
                 
-                # Compute cosine similarity
                 similarity = cosine_similarity(emb1, emb2)[0, 0]
                 
-                # Filter by minimum similarity threshold
                 if similarity >= config.MIN_SIMILARITY_SCORE:
-                    # Find complaint metadata
                     complaint1 = next(c for c in complaints if c['id'] == id1)
                     complaint2 = next(c for c in complaints if c['id'] == id2)
                     
@@ -67,16 +60,14 @@ def extract_duplicate_pairs(
                         'complaint_id_1': id1,
                         'complaint_id_2': id2,
                         'similarity_score': float(similarity),
-                        'cluster_id': int(cluster_id),  # Ensure native Python int for JSON serialization
+                        'cluster_id': int(cluster_id),
                         'text_1': complaint1['text'],
                         'text_2': complaint2['text']
                     }
                     duplicate_pairs.append(pair)
     
-    # Sort by similarity score (descending)
     duplicate_pairs.sort(key=lambda x: x['similarity_score'], reverse=True)
     
-    # Return top-k pairs
     return duplicate_pairs[:config.TOP_K_PAIRS]
 
 

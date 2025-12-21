@@ -34,17 +34,14 @@ def compute_cluster_coherence(
         Mean pairwise cosine similarity within cluster
     """
     if len(cluster_ids) < 2:
-        return 1.0  # Singleton clusters have perfect coherence
+        return 1.0
     
-    # Get embeddings for cluster
     cluster_embeddings = np.array([
         embeddings[id_to_idx[cid]] for cid in cluster_ids
     ])
     
-    # Compute pairwise similarities
     similarity_matrix = cosine_similarity(cluster_embeddings)
     
-    # Extract upper triangle (excluding diagonal)
     n = len(cluster_ids)
     similarities = []
     for i in range(n):
@@ -97,7 +94,6 @@ def sample_clusters_for_inspection(
     if sample_size is None:
         sample_size = config.EVALUATION_SAMPLE_SIZE
     
-    # Separate multi-item and singleton clusters
     multi_item_clusters = {
         cid: ids for cid, ids in clusters.items() if len(ids) > 1
     }
@@ -105,10 +101,8 @@ def sample_clusters_for_inspection(
         cid: ids for cid, ids in clusters.items() if len(ids) == 1
     }
     
-    # Prioritize multi-item clusters
     sampled = {}
     
-    # Sample from multi-item clusters first
     if multi_item_clusters:
         n_multi = min(sample_size, len(multi_item_clusters))
         sampled_multi = random.sample(
@@ -116,7 +110,6 @@ def sample_clusters_for_inspection(
         )
         sampled.update(dict(sampled_multi))
     
-    # Fill remaining slots with singletons if needed
     remaining = sample_size - len(sampled)
     if remaining > 0 and singleton_clusters:
         n_singletons = min(remaining, len(singleton_clusters))
@@ -144,14 +137,11 @@ def export_clusters_for_inspection(
     # Create mapping from ID to complaint
     id_to_complaint = {c['id']: c for c in complaints}
     
-    # Format clusters with full complaint data
     formatted_clusters = []
     for cluster_id, complaint_ids in sampled_clusters.items():
-        # Convert complaint dictionaries to ensure JSON-serializable types
         complaint_list = []
         for cid in complaint_ids:
             complaint = id_to_complaint[cid].copy()
-            # Convert all values to JSON-serializable types
             serializable_complaint = {}
             for key, value in complaint.items():
                 if isinstance(value, (np.integer, np.int64)):
@@ -165,13 +155,12 @@ def export_clusters_for_inspection(
             complaint_list.append(serializable_complaint)
         
         cluster_data = {
-            'cluster_id': int(cluster_id),  # Ensure native Python int
+            'cluster_id': int(cluster_id),
             'n_complaints': int(len(complaint_ids)),
             'complaints': complaint_list
         }
         formatted_clusters.append(cluster_data)
     
-    # Write to JSON
     output_file.parent.mkdir(parents=True, exist_ok=True)
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(formatted_clusters, f, ensure_ascii=False, indent=2)
@@ -199,7 +188,6 @@ def generate_evaluation_report(
     lines.append("=" * 80)
     lines.append("")
     
-    # Cluster statistics
     lines.append("Cluster Statistics:")
     lines.append(f"  Total clusters: {len(clusters)}")
     n_singletons = sum(1 for ids in clusters.values() if len(ids) == 1)
@@ -207,7 +195,6 @@ def generate_evaluation_report(
     lines.append(f"  Multi-item clusters: {len(clusters) - n_singletons}")
     lines.append("")
     
-    # Coherence statistics
     if cluster_coherences:
         coherences = list(cluster_coherences.values())
         lines.append("Cluster Coherence Statistics:")
@@ -217,7 +204,6 @@ def generate_evaluation_report(
         lines.append(f"  Max coherence: {np.max(coherences):.4f}")
         lines.append("")
     
-    # Duplicate pairs statistics
     lines.append("Duplicate Pairs Statistics:")
     lines.append(f"  Total pairs found: {len(duplicate_pairs)}")
     if duplicate_pairs:
@@ -228,7 +214,6 @@ def generate_evaluation_report(
         lines.append(f"  Max similarity: {np.max(similarities):.4f}")
     lines.append("")
     
-    # Top clusters by coherence
     if cluster_coherences:
         lines.append("Top 10 Clusters by Coherence:")
         sorted_clusters = sorted(
@@ -243,7 +228,6 @@ def generate_evaluation_report(
                 f"n_complaints={n_complaints}"
             )
     
-    # Write report
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("\n".join(lines))
 

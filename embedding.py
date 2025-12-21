@@ -30,7 +30,6 @@ class EmbeddingGenerator:
                        Defaults to config.EMBEDDING_MODEL_NAME
         """
         self.model_name = model_name or config.EMBEDDING_MODEL_NAME
-        # Lazy loading: model loaded only when needed
         self.model: Optional[SentenceTransformer] = None
         self.cache_file = config.EMBEDDING_CACHE_FILE
         self.ids_cache_file = config.EMBEDDING_IDS_CACHE_FILE
@@ -38,7 +37,6 @@ class EmbeddingGenerator:
     def _load_model(self):
         """Lazy load the sentence transformer model."""
         if self.model is None:
-            # Model will be downloaded on first use if not cached locally
             self.model = SentenceTransformer(self.model_name)
     
     def _load_cache(self) -> Tuple[Optional[np.ndarray], Optional[List[str]]]:
@@ -57,7 +55,6 @@ class EmbeddingGenerator:
                 cached_ids = json.load(f)
             return embeddings, cached_ids
         except Exception as e:
-            # If cache is corrupted, return None to regenerate
             print(f"Warning: Could not load cache: {e}")
             return None, None
     
@@ -97,18 +94,14 @@ class EmbeddingGenerator:
         complaint_ids = [c['id'] for c in complaints]
         texts = [c['text'] for c in complaints]
         
-        # Load existing cache
         cached_embeddings = None
         cached_ids = None
         if use_cache:
             cached_embeddings, cached_ids = self._load_cache()
         
-        # Determine which complaints need new embeddings
         if cached_embeddings is not None and cached_ids is not None:
-            # Create mapping from ID to cached embedding index
             cached_id_to_idx = {cid: idx for idx, cid in enumerate(cached_ids)}
             
-            # Find new complaints
             new_complaint_indices = []
             new_texts = []
             for idx, cid in enumerate(complaint_ids):
@@ -117,7 +110,6 @@ class EmbeddingGenerator:
                     new_texts.append(texts[idx])
             
             if new_texts:
-                # Generate embeddings for new complaints
                 self._load_model()
                 new_embeddings = self.model.encode(
                     new_texts,
@@ -125,15 +117,12 @@ class EmbeddingGenerator:
                     convert_to_numpy=True
                 )
                 
-                # Merge with cached embeddings
                 all_embeddings = np.vstack([cached_embeddings, new_embeddings])
                 all_ids = cached_ids + [complaint_ids[i] for i in new_complaint_indices]
             else:
-                # All complaints are cached
                 all_embeddings = cached_embeddings
                 all_ids = cached_ids
         else:
-            # No cache available, generate all embeddings
             self._load_model()
             all_embeddings = self.model.encode(
                 texts,
@@ -142,19 +131,15 @@ class EmbeddingGenerator:
             )
             all_ids = complaint_ids
         
-        # Save updated cache
         if use_cache:
             self._save_cache(all_embeddings, all_ids)
         
-        # Create mapping from complaint ID to embedding row index
         id_to_idx = {cid: idx for idx, cid in enumerate(all_ids)}
         
-        # Extract embeddings for requested complaints in order
         requested_embeddings = np.array([
             all_embeddings[id_to_idx[cid]] for cid in complaint_ids
         ])
         
-        # Create mapping for requested complaints
         requested_id_to_idx = {cid: idx for idx, cid in enumerate(complaint_ids)}
         
         return requested_embeddings, requested_id_to_idx

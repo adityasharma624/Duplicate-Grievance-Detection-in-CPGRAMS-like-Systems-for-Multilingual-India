@@ -53,7 +53,6 @@ def run_pipeline(
     print("=" * 80)
     print()
     
-    # Step 1: Data ingestion
     print("Step 1: Data Ingestion")
     print("-" * 80)
     complaints = data_ingestion.load_complaints(input_file)
@@ -61,14 +60,12 @@ def run_pipeline(
     print(f"Loaded {len(complaints)} valid complaints")
     print()
     
-    # Step 2: Preprocessing
     print("Step 2: Preprocessing")
     print("-" * 80)
     preprocessed_complaints = preprocessing.preprocess_complaints(complaints)
     print(f"Preprocessed {len(preprocessed_complaints)} complaints")
     print()
     
-    # Step 3: Embedding generation
     print("Step 3: Embedding Generation")
     print("-" * 80)
     print(f"Using model: {config.EMBEDDING_MODEL_NAME}")
@@ -80,7 +77,6 @@ def run_pipeline(
     print(f"Generated embeddings of shape {embeddings.shape}")
     print()
     
-    # Step 4: Clustering
     print("Step 4: Clustering")
     print("-" * 80)
     print(f"Distance threshold: {config.CLUSTERING_DISTANCE_THRESHOLD}")
@@ -94,7 +90,6 @@ def run_pipeline(
     print(f"  - Max cluster size: {cluster_stats['max_cluster_size']}")
     print()
     
-    # Step 5: Duplicate pair extraction
     print("Step 5: Duplicate Pair Extraction")
     print("-" * 80)
     print(f"Minimum similarity: {config.MIN_SIMILARITY_SCORE}")
@@ -104,7 +99,6 @@ def run_pipeline(
     print(f"Extracted {len(duplicate_pairs)} duplicate pairs")
     print()
     
-    # Step 6: Evaluation (optional)
     if not skip_evaluation:
         print("Step 6: Evaluation")
         print("-" * 80)
@@ -113,7 +107,6 @@ def run_pipeline(
         )
         print(f"Computed coherence for {len(cluster_coherences)} clusters")
         
-        # Sample clusters for manual inspection
         sampled_clusters = evaluation.sample_clusters_for_inspection(clusters)
         inspection_file = output_dir / "clusters_for_inspection.json"
         evaluation.export_clusters_for_inspection(
@@ -122,7 +115,6 @@ def run_pipeline(
         print(f"Exported {len(sampled_clusters)} clusters for inspection")
         print(f"  Output: {inspection_file}")
         
-        # Generate evaluation report
         report_file = output_dir / "evaluation_report.txt"
         evaluation.generate_evaluation_report(
             clusters, cluster_coherences, duplicate_pairs, report_file
@@ -130,24 +122,20 @@ def run_pipeline(
         print(f"Generated evaluation report: {report_file}")
         print()
     
-    # Save results
     print("Saving Results")
     print("-" * 80)
     
-    # Save duplicate pairs as JSON
     pairs_file = output_dir / "duplicate_pairs.json"
     with open(pairs_file, 'w', encoding='utf-8') as f:
         json.dump(duplicate_pairs, f, ensure_ascii=False, indent=2)
     print(f"Saved duplicate pairs: {pairs_file}")
     
-    # Save duplicate pairs as human-readable text
     pairs_text_file = output_dir / "duplicate_pairs.txt"
     pairs_text = duplicate_extraction.format_duplicate_pairs_output(duplicate_pairs)
     with open(pairs_text_file, 'w', encoding='utf-8') as f:
         f.write(pairs_text)
     print(f"Saved duplicate pairs (text): {pairs_text_file}")
     
-    # Save cluster assignments
     cluster_assignments = {}
     for cluster_id, complaint_ids in clusters.items():
         for cid in complaint_ids:
@@ -162,7 +150,6 @@ def run_pipeline(
     print("Pipeline completed successfully!")
     print("=" * 80)
     
-    # Return results summary
     results = {
         'n_complaints': int(len(preprocessed_complaints)),
         'n_clusters': int(cluster_stats['n_clusters']),
@@ -210,19 +197,16 @@ Note: The input file must be a CSV or JSON file with 'id' and 'text' columns/fie
     
     args = parser.parse_args()
     
-    # Validate input file exists
     if not args.input.exists():
         parser.error(f"Input file not found: {args.input}\n"
                     f"Please provide a valid CSV or JSON file path.")
     
-    # Run pipeline
     results = run_pipeline(
         input_file=args.input,
         output_dir=args.output_dir,
         skip_evaluation=args.skip_evaluation
     )
     
-    # Print summary
     print("\nSummary:")
     print(f"  Processed {results['n_complaints']} complaints")
     print(f"  Found {results['n_clusters']} clusters")

@@ -40,34 +40,23 @@ def cluster_complaints(
         return {}
     
     if n_complaints == 1:
-        # Single complaint forms its own cluster
         return {0: complaint_ids}
     
-    # Normalize embeddings to unit length for cosine distance
-    # This ensures cosine distance = 1 - cosine similarity
     norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
-    # Avoid division by zero for zero vectors
     norms = np.where(norms == 0, 1, norms)
     normalized_embeddings = embeddings / norms
     
-    # Compute pairwise cosine distances
-    # cosine_distances returns 1 - cosine_similarity
-    # Range: [0, 2] where 0 = identical, 2 = opposite
     distance_matrix = cosine_distances(normalized_embeddings)
     
-    # Apply agglomerative clustering
-    # distance_threshold: maximum distance for merging clusters
-    # linkage: 'average' balances between 'complete' (strict) and 'single' (lenient)
     clustering = AgglomerativeClustering(
-        n_clusters=None,  # Let distance_threshold determine number of clusters
+        n_clusters=None,
         distance_threshold=config.CLUSTERING_DISTANCE_THRESHOLD,
         linkage=config.CLUSTERING_LINKAGE,
-        metric='precomputed'  # Use precomputed distance matrix
+        metric='precomputed'
     )
     
     cluster_labels = clustering.fit_predict(distance_matrix)
     
-    # Group complaint IDs by cluster
     clusters = {}
     for complaint_id, cluster_id in zip(complaint_ids, cluster_labels):
         if cluster_id not in clusters:
