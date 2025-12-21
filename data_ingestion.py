@@ -1,10 +1,3 @@
-"""
-Data ingestion module.
-
-Handles loading complaint data from CSV or JSON files.
-No assumptions about data cleanliness or language.
-"""
-
 import json
 import pandas as pd
 from pathlib import Path
@@ -13,18 +6,6 @@ import config
 
 
 def load_complaints(file_path: Path) -> List[Dict[str, Any]]:
-    """
-    Load complaints from CSV or JSON file.
-    
-    Args:
-        file_path: Path to input file (CSV or JSON)
-        
-    Returns:
-        List of complaint dictionaries with 'id' and 'text' fields
-        
-    Raises:
-        ValueError: If file format is not supported or required columns are missing
-    """
     file_path = Path(file_path)
     
     if not file_path.exists():
@@ -74,17 +55,6 @@ def load_complaints(file_path: Path) -> List[Dict[str, Any]]:
 
 
 def validate_complaints(complaints: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Validate and filter complaints.
-    
-    Removes complaints with empty or invalid text.
-    
-    Args:
-        complaints: List of complaint dictionaries
-        
-    Returns:
-        Filtered list of valid complaints
-    """
     valid_complaints = []
     for complaint in complaints:
         text = complaint.get('text', '')

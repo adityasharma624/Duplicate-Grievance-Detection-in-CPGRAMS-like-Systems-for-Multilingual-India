@@ -1,9 +1,3 @@
-"""
-Duplicate pair extraction module.
-
-Extracts potential duplicate pairs from clusters and assigns similarity scores.
-"""
-
 import numpy as np
 from typing import List, Dict, Any, Tuple
 from sklearn.metrics.pairwise import cosine_similarity
@@ -16,25 +10,6 @@ def extract_duplicate_pairs(
     id_to_idx: Dict[str, int],
     complaints: List[Dict[str, Any]]
 ) -> List[Dict[str, Any]]:
-    """
-    Extract duplicate pairs from clusters.
-    
-    Strategy:
-    1. Within each cluster, generate all pairs of complaints
-    2. Compute cosine similarity for each pair
-    3. Filter by minimum similarity threshold
-    4. Sort by similarity score (descending)
-    5. Return top-k pairs
-    
-    Args:
-        clusters: Dictionary mapping cluster_id to list of complaint IDs
-        embeddings: Embedding matrix
-        id_to_idx: Mapping from complaint ID to embedding row index
-        complaints: List of complaint dictionaries (for metadata)
-        
-    Returns:
-        List of duplicate pair dictionaries with similarity scores
-    """
     duplicate_pairs = []
     
     for cluster_id, complaint_ids in clusters.items():
@@ -72,15 +47,6 @@ def extract_duplicate_pairs(
 
 
 def format_duplicate_pairs_output(duplicate_pairs: List[Dict[str, Any]]) -> str:
-    """
-    Format duplicate pairs for human-readable output.
-    
-    Args:
-        duplicate_pairs: List of duplicate pair dictionaries
-        
-    Returns:
-        Formatted string representation
-    """
     lines = []
     lines.append(f"Found {len(duplicate_pairs)} duplicate pairs\n")
     lines.append("=" * 80)

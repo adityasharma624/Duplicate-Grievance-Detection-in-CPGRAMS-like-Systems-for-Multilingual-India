@@ -1,19 +1,3 @@
-"""
-Main pipeline orchestrator for duplicate grievance detection.
-
-Executes the complete pipeline:
-1. Data ingestion
-2. Preprocessing
-3. Embedding generation
-4. Clustering
-5. Duplicate pair extraction
-6. Evaluation
-
-Usage:
-    python main.py --input data/complaints.csv
-    python main.py --input data/complaints.json --output-dir results
-"""
-
 import argparse
 import json
 from pathlib import Path
@@ -32,17 +16,6 @@ def run_pipeline(
     output_dir: Optional[Path] = None,
     skip_evaluation: bool = False
 ) -> Dict[str, Any]:
-    """
-    Execute the complete duplicate detection pipeline.
-    
-    Args:
-        input_file: Path to input CSV or JSON file
-        output_dir: Directory for output files (default: config.OUTPUT_DIR)
-        skip_evaluation: If True, skip evaluation step
-        
-    Returns:
-        Dictionary with pipeline results
-    """
     if output_dir is None:
         output_dir = config.OUTPUT_DIR
     output_dir = Path(output_dir)
@@ -161,7 +134,6 @@ def run_pipeline(
 
 
 def main():
-    """Command-line interface for the pipeline."""
     parser = argparse.ArgumentParser(
         description="Duplicate Grievance Detection Pipeline",
         formatter_class=argparse.RawDescriptionHelpFormatter,

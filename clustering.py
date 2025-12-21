@@ -1,10 +1,3 @@
-"""
-Clustering module.
-
-Groups complaints into clusters of potential duplicates.
-Uses CPU-efficient algorithms suitable for academic reproducibility.
-"""
-
 import numpy as np
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics.pairwise import cosine_distances
@@ -16,24 +9,6 @@ def cluster_complaints(
     embeddings: np.ndarray,
     complaint_ids: List[str]
 ) -> Dict[int, List[str]]:
-    """
-    Cluster complaints using agglomerative clustering.
-    
-    Algorithm choice: Agglomerative Clustering with cosine distance
-    Rationale:
-    - Deterministic and interpretable (important for academic work)
-    - No random initialization, reproducible results
-    - Scales reasonably on CPU (O(n^2 log n) for linkage computation)
-    - Cosine distance is appropriate for normalized embeddings
-    - Distance threshold provides intuitive control over cluster granularity
-    
-    Args:
-        embeddings: Numpy array of shape (n_complaints, embedding_dim)
-        complaint_ids: List of complaint IDs in same order as embeddings
-        
-    Returns:
-        Dictionary mapping cluster_id to list of complaint IDs in that cluster
-    """
     n_complaints = len(embeddings)
     
     if n_complaints == 0:
@@ -67,15 +42,6 @@ def cluster_complaints(
 
 
 def get_cluster_statistics(clusters: Dict[int, List[str]]) -> Dict[str, Any]:
-    """
-    Compute statistics about clustering results.
-    
-    Args:
-        clusters: Dictionary mapping cluster_id to list of complaint IDs
-        
-    Returns:
-        Dictionary with clustering statistics
-    """
     cluster_sizes = [len(complaint_ids) for complaint_ids in clusters.values()]
     
     stats = {

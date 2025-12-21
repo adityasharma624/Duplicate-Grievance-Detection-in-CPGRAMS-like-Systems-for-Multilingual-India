@@ -1,10 +1,3 @@
-"""
-Evaluation module.
-
-Provides weak evaluation metrics and tools for manual inspection.
-Suitable for low-resource scenarios with minimal human annotation.
-"""
-
 import json
 import random
 from pathlib import Path
@@ -19,20 +12,6 @@ def compute_cluster_coherence(
     embeddings: np.ndarray,
     id_to_idx: Dict[str, int]
 ) -> float:
-    """
-    Compute cluster coherence as mean pairwise similarity within cluster.
-    
-    Coherence measures how similar complaints are within a cluster.
-    Higher coherence indicates better cluster quality.
-    
-    Args:
-        cluster_ids: List of complaint IDs in cluster
-        embeddings: Embedding matrix
-        id_to_idx: Mapping from complaint ID to embedding row index
-        
-    Returns:
-        Mean pairwise cosine similarity within cluster
-    """
     if len(cluster_ids) < 2:
         return 1.0
     
@@ -56,17 +35,6 @@ def compute_all_cluster_coherences(
     embeddings: np.ndarray,
     id_to_idx: Dict[str, int]
 ) -> Dict[int, float]:
-    """
-    Compute coherence for all clusters.
-    
-    Args:
-        clusters: Dictionary mapping cluster_id to list of complaint IDs
-        embeddings: Embedding matrix
-        id_to_idx: Mapping from complaint ID to embedding row index
-        
-    Returns:
-        Dictionary mapping cluster_id to coherence score
-    """
     coherences = {}
     for cluster_id, cluster_ids in clusters.items():
         coherences[cluster_id] = compute_cluster_coherence(
@@ -79,18 +47,6 @@ def sample_clusters_for_inspection(
     clusters: Dict[int, List[str]],
     sample_size: Optional[int] = None
 ) -> Dict[int, List[str]]:
-    """
-    Sample clusters for manual inspection.
-    
-    Prioritizes multi-item clusters (potential duplicates) over singletons.
-    
-    Args:
-        clusters: Dictionary mapping cluster_id to list of complaint IDs
-        sample_size: Number of clusters to sample (default: config value)
-        
-    Returns:
-        Dictionary of sampled clusters
-    """
     if sample_size is None:
         sample_size = config.EVALUATION_SAMPLE_SIZE
     
@@ -126,15 +82,6 @@ def export_clusters_for_inspection(
     complaints: List[Dict[str, Any]],
     output_file: Path
 ):
-    """
-    Export sampled clusters to JSON for manual inspection.
-    
-    Args:
-        sampled_clusters: Dictionary of clusters to export
-        complaints: List of complaint dictionaries
-        output_file: Path to output JSON file
-    """
-    # Create mapping from ID to complaint
     id_to_complaint = {c['id']: c for c in complaints}
     
     formatted_clusters = []
@@ -172,15 +119,6 @@ def generate_evaluation_report(
     duplicate_pairs: List[Dict[str, Any]],
     output_file: Path
 ):
-    """
-    Generate comprehensive evaluation report.
-    
-    Args:
-        clusters: Dictionary mapping cluster_id to list of complaint IDs
-        cluster_coherences: Dictionary mapping cluster_id to coherence score
-        duplicate_pairs: List of duplicate pair dictionaries
-        output_file: Path to output report file
-    """
     output_file.parent.mkdir(parents=True, exist_ok=True)
     
     lines = []

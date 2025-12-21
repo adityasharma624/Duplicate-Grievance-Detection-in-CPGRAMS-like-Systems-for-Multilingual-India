@@ -1,10 +1,3 @@
-"""
-Embedding module.
-
-Generates multilingual sentence embeddings using pretrained models.
-Implements disk caching to avoid recomputation.
-"""
-
 import numpy as np
 import json
 from pathlib import Path
@@ -14,38 +7,18 @@ import config
 
 
 class EmbeddingGenerator:
-    """
-    Generates and caches sentence embeddings.
-    
-    Uses pretrained multilingual sentence transformer model.
-    Caches embeddings to disk to support incremental processing.
-    """
     
     def __init__(self, model_name: Optional[str] = None):
-        """
-        Initialize embedding generator.
-        
-        Args:
-            model_name: Name of sentence transformer model.
-                       Defaults to config.EMBEDDING_MODEL_NAME
-        """
         self.model_name = model_name or config.EMBEDDING_MODEL_NAME
         self.model: Optional[SentenceTransformer] = None
         self.cache_file = config.EMBEDDING_CACHE_FILE
         self.ids_cache_file = config.EMBEDDING_IDS_CACHE_FILE
     
     def _load_model(self):
-        """Lazy load the sentence transformer model."""
         if self.model is None:
             self.model = SentenceTransformer(self.model_name)
     
     def _load_cache(self) -> Tuple[Optional[np.ndarray], Optional[List[str]]]:
-        """
-        Load embeddings and IDs from cache if available.
-        
-        Returns:
-            Tuple of (embeddings array, list of complaint IDs)
-        """
         if not self.cache_file.exists() or not self.ids_cache_file.exists():
             return None, None
         
@@ -59,13 +32,6 @@ class EmbeddingGenerator:
             return None, None
     
     def _save_cache(self, embeddings: np.ndarray, complaint_ids: List[str]):
-        """
-        Save embeddings and IDs to cache.
-        
-        Args:
-            embeddings: Embedding matrix
-            complaint_ids: List of complaint IDs in same order as embeddings
-        """
         np.save(self.cache_file, embeddings)
         with open(self.ids_cache_file, 'w', encoding='utf-8') as f:
             json.dump(complaint_ids, f, ensure_ascii=False, indent=2)
@@ -75,22 +41,6 @@ class EmbeddingGenerator:
         complaints: List[Dict[str, Any]],
         use_cache: bool = True
     ) -> Tuple[np.ndarray, Dict[str, int]]:
-        """
-        Generate embeddings for complaints with caching support.
-        
-        Strategy:
-        1. Load existing cache if available
-        2. Identify complaints not in cache
-        3. Generate embeddings only for new complaints
-        4. Merge and save updated cache
-        
-        Args:
-            complaints: List of complaint dictionaries with 'id' and 'text'
-            use_cache: Whether to use disk cache (default: True)
-            
-        Returns:
-            Tuple of (embedding matrix, mapping from complaint ID to row index)
-        """
         complaint_ids = [c['id'] for c in complaints]
         texts = [c['text'] for c in complaints]
         

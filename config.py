@@ -1,10 +1,3 @@
-"""
-Configuration module for duplicate grievance detection system.
-
-Centralizes all system parameters to ensure reproducibility.
-All design choices are documented here.
-"""
-
 from pathlib import Path
 from typing import Optional
 
